@@ -7,9 +7,9 @@ Passwords are hashed with bcrypt before storage (never stored in plain text).
 
 import secrets
 
+import bcrypt
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from passlib.hash import bcrypt
 
 from ..dependencies import get_db
 from ..models import User
@@ -21,6 +21,16 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 def _generate_token() -> str:
     """Generate a cryptographically secure random session token."""
     return secrets.token_hex(32)
+
+
+def _hash_password(password: str) -> str:
+    """Hash a plain-text password with bcrypt."""
+    return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+
+
+def _verify_password(password: str, password_hash: str) -> bool:
+    """Check a plain-text password against a bcrypt hash."""
+    return bcrypt.checkpw(password.encode(), password_hash.encode())
 
 
 @router.post("/register", response_model=AuthResponse, status_code=status.HTTP_201_CREATED)
@@ -43,7 +53,7 @@ def register(data: RegisterRequest, db: Session = Depends(get_db)):
     token = _generate_token()
     user = User(
         username=data.username,
-        password_hash=bcrypt.hash(data.password),
+        password_hash=_hash_password(data.password),
         credits=0.0,
         session_token=token,
     )
@@ -67,7 +77,7 @@ def login(data: LoginRequest, db: Session = Depends(get_db)):
     - Generates a new session token (invalidates any previous token)
     """
     user = db.query(User).filter(User.username == data.username).first()
-    if not user or not bcrypt.verify(data.password, user.password_hash):
+    if not user or not _verify_password(data.password, user.password_hash):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid username or password",
