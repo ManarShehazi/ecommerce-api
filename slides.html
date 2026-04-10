@@ -173,7 +173,7 @@ created_at  DATETIME</div>
 
 <!-- SLIDE 7: Purchase Flow (Core Logic) -->
 <div class="slide">
-  <h2>Purchase Flow ⭐</h2>
+  <h2>Purchase Flow </h2>
   <p style="margin-bottom: 16px; color: #aaa;">The most critical endpoint — must be <span class="highlight">atomic</span></p>
   <div class="flow-step"><span class="num">1.</span> Find the product → <span class="badge badge-no">404</span> if not found</div>
   <div class="flow-step"><span class="num">2.</span> Check credits ≥ price → <span class="badge badge-no">400</span> if insufficient</div>
@@ -181,7 +181,7 @@ created_at  DATETIME</div>
   <div class="flow-step"><span class="num">4.</span> Create Order with <span class="highlight">price_paid</span> snapshot</div>
   <div class="flow-step"><span class="num">5.</span> <span class="highlight">Single commit()</span> — both succeed or both roll back</div>
   <br/>
-  <p>🔒 <b>Atomicity</b>: user never loses credits without getting an order.</p>
+  <p> <b>Atomicity</b>: user never loses credits without getting an order.</p>
 </div>
 
 <!-- SLIDE 8: Design Decisions -->
@@ -223,7 +223,7 @@ created_at  DATETIME</div>
         <li>JWT with refresh tokens + expiry</li>
         <li>Test suite (pytest + RTL)</li>
         <li>PostgreSQL for production</li>
-        <li>Input validation hardening</li>
+        <li>Input validation hardening, eg:  minimum password length</li>
         <li>Rate limiting on auth</li>
       </ul>
     </div>
