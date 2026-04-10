@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>E-Commerce API — Presentation</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #1a1a2e; color: #eee; }
+
+  .slide {
+    display: none;
+    width: 100vw; height: 100vh;
+    padding: 60px 80px;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .slide.active { display: flex; }
+
+  h1 { font-size: 2.8em; margin-bottom: 20px; color: #00d4aa; }
+  h2 { font-size: 2.2em; margin-bottom: 24px; color: #00d4aa; }
+  h3 { font-size: 1.4em; margin-bottom: 16px; color: #00d4aa; }
+  p, li { font-size: 1.3em; line-height: 1.7; }
+  ul { margin-left: 30px; }
+  li { margin-bottom: 10px; }
+
+  .subtitle { font-size: 1.5em; color: #aaa; margin-top: 10px; }
+  .highlight { color: #ffd700; font-weight: bold; }
+  .code-block {
+    background: #16213e;
+    border-radius: 8px;
+    padding: 20px 28px;
+    font-family: 'Cascadia Code', 'Fira Code', monospace;
+    font-size: 1.05em;
+    line-height: 1.6;
+    margin: 16px 0;
+    white-space: pre;
+    overflow-x: auto;
+    border-left: 4px solid #00d4aa;
+  }
+
+  table { border-collapse: collapse; margin: 16px 0; width: 100%; }
+  th, td { padding: 12px 20px; text-align: left; border-bottom: 1px solid #333; font-size: 1.1em; }
+  th { color: #00d4aa; font-size: 1.15em; }
+
+  .nav {
+    position: fixed; bottom: 20px; right: 30px;
+    display: flex; gap: 10px; align-items: center;
+  }
+  .nav button {
+    padding: 10px 22px; font-size: 1em;
+    background: #00d4aa; color: #1a1a2e;
+    border: none; border-radius: 6px; cursor: pointer; font-weight: bold;
+  }
+  .nav button:hover { background: #00f0c0; }
+  .nav span { color: #666; font-size: 0.95em; }
+
+  .two-col { display: flex; gap: 40px; }
+  .two-col > div { flex: 1; }
+
+  .badge {
+    display: inline-block; padding: 3px 10px; border-radius: 4px;
+    font-size: 0.85em; font-weight: bold;
+  }
+  .badge-yes { background: #00d4aa33; color: #00d4aa; }
+  .badge-no { background: #ff634733; color: #ff6347; }
+
+  .flow-step {
+    background: #16213e; border-radius: 8px; padding: 14px 20px;
+    margin: 8px 0; font-size: 1.15em; border-left: 4px solid #00d4aa;
+  }
+  .flow-step .num { color: #00d4aa; font-weight: bold; margin-right: 8px; }
+</style>
+</head>
+<body>
+
+<!-- SLIDE 1: Title -->
+<div class="slide active">
+  <h1>🛒 E-Commerce API</h1>
+  <p class="subtitle">A simplified e-commerce application</p>
+  <br/>
+  <p style="font-size:1.2em;">FastAPI &bull; React &bull; SQLite &bull; SQLAlchemy</p>
+  <br/><br/>
+  <p style="color:#666;">Manar Shehazi</p>
+</div>
+
+<!-- SLIDE 2: What it does -->
+<div class="slide">
+  <h2>What It Does</h2>
+  <ul>
+    <li><span class="highlight">Register / Login</span> — simple session-token auth</li>
+    <li><span class="highlight">Browse Products</span> — 5 items in the catalog</li>
+    <li><span class="highlight">Add Credits</span> — virtual currency (no payment flow)</li>
+    <li><span class="highlight">Purchase Products</span> — debit balance, create order</li>
+    <li><span class="highlight">Order History</span> — view past purchases</li>
+  </ul>
+</div>
+
+<!-- SLIDE 3: Architecture -->
+<div class="slide">
+  <h2>Architecture</h2>
+  <div class="code-block">React Frontend  ──HTTP/JSON──▶  FastAPI Backend  ──▶  SQLite
+     │                               │
+   api.js                    ┌───────┼───────┐
+  (axios +                routes/   models.py  schemas.py
+   token                     │
+ interceptor)          dependencies.py
+                       (DB session + auth guard)</div>
+  <br/>
+  <ul>
+    <li><span class="highlight">Separation of concerns</span> — routes, models, schemas, deps in separate files</li>
+    <li><span class="highlight">Frontend is a thin client</span> — all business logic in the backend</li>
+    <li><span class="highlight">SQLAlchemy ORM</span> — swap to PostgreSQL with one config change</li>
+  </ul>
+</div>
+
+<!-- SLIDE 4: API Endpoints -->
+<div class="slide">
+  <h2>API Endpoints</h2>
+  <table>
+    <tr><th>Method</th><th>Path</th><th>Auth</th><th>Purpose</th></tr>
+    <tr><td>POST</td><td>/auth/register</td><td><span class="badge badge-no">No</span></td><td>Create account</td></tr>
+    <tr><td>POST</td><td>/auth/login</td><td><span class="badge badge-no">No</span></td><td>Login → get token</td></tr>
+    <tr><td>GET</td><td>/products/</td><td><span class="badge badge-no">No</span></td><td>List catalog</td></tr>
+    <tr><td>POST</td><td>/credits/add</td><td><span class="badge badge-yes">Yes</span></td><td>Add 5 credits</td></tr>
+    <tr><td>GET</td><td>/credits/</td><td><span class="badge badge-yes">Yes</span></td><td>Check balance</td></tr>
+    <tr><td>POST</td><td>/orders/</td><td><span class="badge badge-yes">Yes</span></td><td>Purchase a product</td></tr>
+    <tr><td>GET</td><td>/orders/</td><td><span class="badge badge-yes">Yes</span></td><td>Order history</td></tr>
+  </table>
+</div>
+
+<!-- SLIDE 5: Database Models -->
+<div class="slide">
+  <h2>Database Models</h2>
+  <div class="two-col">
+    <div>
+      <h3>Users</h3>
+      <div class="code-block">id          INTEGER PK
+username    STRING UNIQUE
+password_hash STRING
+credits     FLOAT
+session_token STRING</div>
+      <h3 style="margin-top:20px;">Products</h3>
+      <div class="code-block">id          INTEGER PK
+name        STRING
+description STRING
+price       FLOAT</div>
+    </div>
+    <div>
+      <h3>Orders</h3>
+      <div class="code-block">id          INTEGER PK
+user_id     FK → users
+product_id  FK → products
+price_paid  FLOAT  ← snapshot!
+created_at  DATETIME</div>
+      <br/>
+      <p>💡 <span class="highlight">price_paid</span> is a snapshot of the price at purchase time. If the product price changes later, the order history stays accurate.</p>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 6: Auth Flow -->
+<div class="slide">
+  <h2>Authentication Flow</h2>
+  <div class="flow-step"><span class="num">1.</span> User sends <span class="highlight">POST /auth/register</span> with username + password</div>
+  <div class="flow-step"><span class="num">2.</span> Server hashes password with <span class="highlight">bcrypt</span>, generates random token</div>
+  <div class="flow-step"><span class="num">3.</span> Returns <span class="highlight">{ token, user }</span> — client stores token in localStorage</div>
+  <div class="flow-step"><span class="num">4.</span> Every subsequent request includes <span class="highlight">Authorization: Bearer &lt;token&gt;</span></div>
+  <div class="flow-step"><span class="num">5.</span> <span class="highlight">get_current_user</span> dependency looks up user by token → returns User or 401</div>
+  <br/>
+  <p style="color:#aaa;">Simple for this scope. In production → JWT with refresh tokens + expiry (Improvement #1).</p>
+</div>
+
+<!-- SLIDE 7: Purchase Flow (Core Logic) -->
+<div class="slide">
+  <h2>Purchase Flow ⭐</h2>
+  <p style="margin-bottom: 16px; color: #aaa;">The most critical endpoint — must be <span class="highlight">atomic</span></p>
+  <div class="flow-step"><span class="num">1.</span> Find the product → <span class="badge badge-no">404</span> if not found</div>
+  <div class="flow-step"><span class="num">2.</span> Check credits ≥ price → <span class="badge badge-no">400</span> if insufficient</div>
+  <div class="flow-step"><span class="num">3.</span> Debit balance: <code>user.credits -= product.price</code></div>
+  <div class="flow-step"><span class="num">4.</span> Create Order with <span class="highlight">price_paid</span> snapshot</div>
+  <div class="flow-step"><span class="num">5.</span> <span class="highlight">Single commit()</span> — both succeed or both roll back</div>
+  <br/>
+  <p>🔒 <b>Atomicity</b>: user never loses credits without getting an order.</p>
+</div>
+
+<!-- SLIDE 8: Design Decisions -->
+<div class="slide">
+  <h2>Design Decisions</h2>
+  <ul>
+    <li><span class="highlight">Session tokens over JWT</span> — simpler; no expiry/signing logic. Trade-off: DB lookup per request.</li>
+    <li><span class="highlight">price_paid on orders</span> — historical accuracy, standard e-commerce pattern.</li>
+    <li><span class="highlight">Schemas ≠ Models</span> — models describe DB; schemas describe API contract. Prevents leaking password_hash.</li>
+    <li><span class="highlight">Single DB transaction</span> — atomic purchase: debit + order in one commit.</li>
+    <li><span class="highlight">bcrypt</span> — intentionally slow hashing, protects against brute-force.</li>
+    <li><span class="highlight">FastAPI Depends()</span> — dependency injection for DB sessions and auth guard. Clean, testable.</li>
+  </ul>
+</div>
+
+<!-- SLIDE 9: Error Handling -->
+<div class="slide">
+  <h2>Error Handling</h2>
+  <table>
+    <tr><th>Situation</th><th>Status Code</th><th>Where</th></tr>
+    <tr><td>Duplicate username</td><td>409 Conflict</td><td>auth.py</td></tr>
+    <tr><td>Wrong password</td><td>401 Unauthorized</td><td>auth.py</td></tr>
+    <tr><td>Missing / invalid token</td><td>401 Unauthorized</td><td>dependencies.py</td></tr>
+    <tr><td>Product not found</td><td>404 Not Found</td><td>orders.py</td></tr>
+    <tr><td>Insufficient credits</td><td>400 Bad Request</td><td>orders.py</td></tr>
+    <tr><td>Invalid request body</td><td>422 Unprocessable</td><td>FastAPI auto</td></tr>
+  </table>
+  <br/>
+  <p>Pydantic validates inputs automatically. Business errors use meaningful HTTP codes + detail messages.</p>
+</div>
+
+<!-- SLIDE 10: Improvements -->
+<div class="slide">
+  <h2>Prioritized Improvements</h2>
+  <div class="two-col">
+    <div>
+      <h3>High Priority</h3>
+      <ul>
+        <li>JWT with refresh tokens + expiry</li>
+        <li>Test suite (pytest + RTL)</li>
+        <li>PostgreSQL for production</li>
+        <li>Input validation hardening</li>
+        <li>Rate limiting on auth</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Nice to Have</h3>
+      <ul>
+        <li>Pagination</li>
+        <li>Admin panel</li>
+        <li>Stripe payment integration</li>
+        <li>Server-side logout</li>
+        <li>CSS framework / design system</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 11: Demo -->
+<div class="slide">
+  <h1>🎬 Live Demo</h1>
+  <br/>
+  <ul>
+    <li>Register a new user</li>
+    <li>Add credits</li>
+    <li>Purchase a product</li>
+    <li>See "insufficient credits" error</li>
+    <li>View order history</li>
+    <li>Swagger UI at <span class="highlight">/docs</span></li>
+  </ul>
+  <br/>
+  <p style="color:#666;">Frontend: http://localhost:5173 &nbsp;&bull;&nbsp; API docs: http://localhost:8000/docs</p>
+</div>
+
+<!-- SLIDE 12: Thank you -->
+<div class="slide">
+  <h1>Thank You!</h1>
+  <p class="subtitle">Questions?</p>
+  <br/><br/>
+  <p style="color:#666;">github.com/... &bull; E-Commerce API</p>
+</div>
+
+<!-- Navigation -->
+<div class="nav">
+  <button onclick="prev()">← Prev</button>
+  <span id="counter">1 / 12</span>
+  <button onclick="next()">Next →</button>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  let current = 0;
+
+  function show(n) {
+    slides[current].classList.remove('active');
+    current = (n + slides.length) % slides.length;
+    slides[current].classList.add('active');
+    document.getElementById('counter').textContent = `${current + 1} / ${slides.length}`;
+  }
+
+  function next() { show(current + 1); }
+  function prev() { show(current - 1); }
+
+  // Keyboard navigation: arrow keys or space
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); next(); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
+  });
+</script>
+</body>
+</html>
